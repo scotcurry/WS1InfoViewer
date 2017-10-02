@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Info Viewer</string>
+
+    <string name="tenant_name_label">Tenant Name</string>
+    <string name="initial_tenant_string">.vmwareidentity.com</string>
+    <string name="admin_user_name">Admin Username:</string>
+    <string name="admin_user_password">Admin Password:</string>
+    <string name="button_save_string">Save</string>
+    <string name="button_connect_string">Connect</string>
+    <string name="tenant_url_label">Tenant URL</string>
+
+    <string name="connection_success">Health Check Successful Connection</string>
+    <string name="connection_failed">Health Check Connection Failed</string>
 </resources>

@@ -7,8 +7,20 @@
     <string name="admin_user_password">Admin Password:</string>
     <string name="button_save_string">Save</string>
     <string name="button_connect_string">Connect</string>
+    <string name="button_list_users">Users</string>
     <string name="tenant_url_label">Tenant URL</string>
 
     <string name="connection_success">Health Check Successful Connection</string>
     <string name="connection_failed">Health Check Connection Failed</string>
+    <string name="auth_token_success">Obtained Auth Token</string>
+    <string name="auth_token_failed">Error Retrieving Auth Token</string>
+    <string name="build_number">Build Number</string>
+    <string name="version_string">Version</string>
+
+    <string name="vidm_domain">.vmwareidentity.com</string>
+
+    <string name="invalid_user_name">Username is Invalid</string>
+    <string name="invalid_user_password">Password is Invalid</string>
+    <string name="invalid_tenant_information">Tenant Information is Invalid</string>
+
 </resources>

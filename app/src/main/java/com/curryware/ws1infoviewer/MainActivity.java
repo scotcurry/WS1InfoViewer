@@ -2,6 +2,7 @@ package com.curryware.ws1infoviewer;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -33,27 +34,30 @@ public class MainActivity extends AppCompatActivity {
     private Activity activity;
     final static String TAG = MainActivity.class.getSimpleName();
 
-    /*  These values are for debug only */
-    final static String adminUserName = "local_admin";
-    final static String adminPassword = "AirWatch1";
-    final static String ws1Tenant = "curryware2.vmwareidentity.com";
-
     final static MediaType mediaTypeJSON = MediaType.parse("application/json; charset=utf-8");
     final static String ws1Domain = ".vmwareidentity.com";
     final static String heathCheckEndpoint = "SAAS/API/1.0/REST/system/health";
     final static String loginEndpoint = "SAAS/API/1.0/REST/auth/system/login";
     final static String PREF_ADMIN_USERNAME = "adminUserName";
-    final static String PREF_ADMIN_PASSWORD = "amdinPassword";
+    final static String PREF_ADMIN_PASSWORD = "adminPassword";
     final static String PREF_TENANT_NAME = "ws1TenantName";
-    OkHttpClient client;
+    final static String AUTH_TOKEN_TO_PASS = "com.curryware.ws1infoviewer.AUTH_TOKEN";
+    final static String TENANT_URL_TO_PASS = "com.curryware.ws1infoviewer.TENANT_URL";
 
     EditText tenantNameEdit;
     EditText adminUserNameEdit;
     EditText adminPasswordEdit;
     TextView completeTenantString;
     TextView healthCheckConnection;
-    Button saveButton;
+    TextView buildNumberTextView;
+    TextView authTokenTextView;
     Button connectButton;
+    Button listUsersButton;
+
+    OkHttpClient client;
+    String VIDM_DOMAIN;
+    String CURRENT_AUTH_TOKEN;
+    String TENANT_URL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +70,10 @@ public class MainActivity extends AppCompatActivity {
         adminPasswordEdit = findViewById(R.id.editTextAdminPassword);
         completeTenantString = findViewById(R.id.textViewCompleteTenant);
         healthCheckConnection = findViewById(R.id.textViewHealthCheckConnectionSuccessful);
+        buildNumberTextView = findViewById(R.id.textViewBuildNumber);
+        authTokenTextView = findViewById(R.id.textViewAuthTokenMessage);
+
+        VIDM_DOMAIN = getString(R.string.vidm_domain);
 
         tenantNameEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -84,14 +92,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        saveButton = findViewById(R.id.buttonSave);
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-               handleSaveSettings();
-            }
-        });
-
         connectButton = findViewById(R.id.buttonConnect);
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,13 +101,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        listUsersButton = findViewById(R.id.buttonListUsers);
+        listUsersButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TENANT_URL = tenantNameEdit.getText().toString();
+                Intent intent = new Intent(activity, ListUserActivity.class);
+                intent.putExtra(AUTH_TOKEN_TO_PASS, CURRENT_AUTH_TOKEN);
+                intent.putExtra(TENANT_URL_TO_PASS, TENANT_URL);
+                startActivity(intent);
+            }
+        });
+
         getSavedPreferences();
     }
 
     void getSystemHealthJSON() {
-        client = new OkHttpClient();
 
-        HttpUrl url = getFormattedURL(heathCheckEndpoint);
+        client = HttpHelpers.getInstance();
+        HttpUrl url = HttpHelpers.getFormattedURL(tenantNameEdit.getText().toString(),  heathCheckEndpoint);
+
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -115,13 +128,24 @@ public class MainActivity extends AppCompatActivity {
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(Call call, final IOException e) {
                 Log.i(TAG, "Call Failed: " + e.getMessage());
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        healthCheckConnection.setVisibility(View.VISIBLE);
+                        healthCheckConnection.setText(getString(R.string.connection_failed));
+                        healthCheckConnection.setTextColor(ContextCompat.getColor(activity, R.color.error_red));
+
+                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
+                    Log.i(TAG, response.body().string());
                     throw new IOException("Unexpected Code: " + response);
                 } else {
                     Log.i(TAG, "Call Succeeded: " + response.toString());
@@ -136,8 +160,17 @@ public class MainActivity extends AppCompatActivity {
                             healthCheckConnection.setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
                             String buildVersion =  sysHealth.getBuildVersion();
                             Log.i(TAG, "Build Version: " + buildVersion);
+
+                            int buildNumberOffset = buildVersion.lastIndexOf("Build");
+                            String buildNumber = buildVersion.substring(0, buildNumberOffset);
+                            buildNumber = getString(R.string.version_string) + " " + buildNumber;
+
+                            buildNumberTextView.setVisibility(View.VISIBLE);
+                            buildNumberTextView.setText(buildNumber);
+                            buildNumberTextView.setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
                         }
                     });
+                    getAuthToken();
                 }
             }
         });
@@ -145,11 +178,9 @@ public class MainActivity extends AppCompatActivity {
 
     void getAuthToken() {
 
-        // String adminJSON = "{\"username\":\"local_admin\", \"password\":\"AirWatch1\", \"issueToken\":\"true\"}";
-
         LoginCredentials loginCreds = new LoginCredentials();
-        loginCreds.setUsername(adminUserName);
-        loginCreds.setPassword(adminPassword);
+        loginCreds.setUsername(adminUserNameEdit.getText().toString());
+        loginCreds.setPassword(adminPasswordEdit.getText().toString());
         loginCreds.setIssueToken("true");
 
         final Gson gson = new Gson();
@@ -158,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         RequestBody body = RequestBody.create(mediaTypeJSON, loginJSON);
 
         Request request = new Request.Builder()
-                .url(getFormattedURL(loginEndpoint))
+                .url(HttpHelpers.getFormattedURL(tenantNameEdit.getText().toString(), loginEndpoint))
                 .post(body)
                 .addHeader("Accept", "application/json")
                 .build();
@@ -166,37 +197,64 @@ public class MainActivity extends AppCompatActivity {
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(Call call, final IOException e) {
                 Log.e(TAG, "Error attempting to login: " + e.getMessage());
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        authTokenTextView.setVisibility(View.VISIBLE);
+                        authTokenTextView.setText(getString(R.string.auth_token_failed));
+                        authTokenTextView.setTextColor(ContextCompat.getColor(activity, R.color.error_red));
+
+                        Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 Log.i(TAG, "Login call returned");
                 if (!response.isSuccessful()) {
+                    final String toastString = response.body().string();
+                    Log.i(TAG, "Error: " + toastString);
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            authTokenTextView.setVisibility(View.VISIBLE);
+                            authTokenTextView.setTextColor(ContextCompat.getColor(activity, R.color.error_red));
+                            authTokenTextView.setText(toastString);
+                            Toast.makeText(activity, toastString, Toast.LENGTH_LONG).show();
+                        }
+                    });
                     throw new IOException("Unexpected Code: " + response);
                 } else {
                     ResponseBody body = response.body();
                     LoginResponse loginResponse = gson.fromJson(response.body().string(), LoginResponse.class);
                     Log.i(TAG, "Session Token: " + loginResponse.getSessionToken());
+                    CURRENT_AUTH_TOKEN = loginResponse.getSessionToken();
+
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            authTokenTextView.setVisibility(View.VISIBLE);
+                            authTokenTextView.setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
+                            authTokenTextView.setText(getString(R.string.auth_token_success));
+                            listUsersButton.setEnabled(true);
+                            handleSaveSettings();
+                        }
+                    });
                 }
             }
         });
-    }
-
-    private HttpUrl getFormattedURL(String urlEndpoint) {
-
-        return new HttpUrl.Builder()
-                .scheme("https")
-                .host(ws1Tenant)
-                .addEncodedPathSegments(urlEndpoint)
-                .build();
     }
 
     private void handleSaveSettings() {
 
         SharedPreferences sharedPrefs = getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPrefs.edit();
+
+        String adminUserName = adminUserNameEdit.getText().toString();
+        String adminPassword = adminPasswordEdit.getText().toString();
 
         byte[] userNameBytes = adminUserName.getBytes();
         byte[] userPasswordBytes = adminPassword.getBytes();
@@ -236,19 +294,36 @@ public class MainActivity extends AppCompatActivity {
 
         if (ws1TenantName.length() > 0) {
             tenantNameEdit.setText(ws1TenantName);
-            completeTenantString.setText("https://" + ws1TenantName + ".vmwareidentity.com");
+            completeTenantString.setText("https://" + ws1TenantName + VIDM_DOMAIN);
         }
     }
 
     private void handleConnectionButton() {
 
-        Log.i(TAG, "Calling getSystemHealthJSON");
-        getSystemHealthJSON();
+        if (validateInput()) {
+            Log.i(TAG, "Calling getSystemHealthJSON");
+            getSystemHealthJSON();
+        }
     }
 
-    private void handleHealthCheckSuccessful() {
+    private boolean validateInput() {
 
-        healthCheckConnection.setVisibility(View.VISIBLE);
-        healthCheckConnection.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
+        boolean dataValidated = true;
+        if (tenantNameEdit.getText().toString().length() == 0) {
+            Toast.makeText(this, getString(R.string.invalid_tenant_information), Toast.LENGTH_LONG).show();
+            dataValidated = false;
+        }
+
+        if (adminUserNameEdit.getText().toString().length() == 0) {
+            Toast.makeText(this, getString(R.string.invalid_user_name), Toast.LENGTH_LONG).show();
+            dataValidated = false;
+        }
+
+        if (adminPasswordEdit.getText().toString().length() == 0) {
+            Toast.makeText(this, getString(R.string.invalid_user_password), Toast.LENGTH_LONG).show();
+            dataValidated = false;
+        }
+
+        return dataValidated;
     }
 }

@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                     });
                     throw new IOException("Unexpected Code: " + response);
                 } else {
-                    ResponseBody body = response.body();
+                    // ResponseBody body = response.body();
                     LoginResponse loginResponse = gson.fromJson(response.body().string(), LoginResponse.class);
                     Log.i(TAG, "Session Token: " + loginResponse.getSessionToken());
                     CURRENT_AUTH_TOKEN = loginResponse.getSessionToken();

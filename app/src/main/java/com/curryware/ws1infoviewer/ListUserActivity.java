@@ -1,6 +1,7 @@
 package com.curryware.ws1infoviewer;
 
 import android.content.Intent;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.app.AppCompatActivity;
@@ -47,11 +48,9 @@ public class ListUserActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerViewUsers);
         recyclerView.setHasFixedSize(true);
-        // List<RecyclerViewUser> ws1Users = getAllUsersFromJSON();
         linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
-        // RecyclerViewAdapterUsers recyclerViewAdapterUsers = new RecyclerViewAdapterUsers(ListUserActivity.this, ws1Users);
-        // recyclerView.setAdapter(recyclerViewAdapterUsers);
+        recyclerView.addItemDecoration(new RecyclerViewItemDecorationUsers(48));
 
         getAllUsers(tenantURL, RAW_OAUTH_TOKEN);
     }
@@ -105,9 +104,6 @@ public class ListUserActivity extends AppCompatActivity {
     private List<RecyclerViewUser> getAllUsersFromJSON(GetUserResponse allResponses) {
 
         List<RecyclerViewUser> allUsers = new ArrayList<>();
-        allUsers.add(new RecyclerViewUser("Scot", "scot@curryware.org"));
-        allUsers.add(new RecyclerViewUser("Vincent", "vincent@curryware.org"));
-        allUsers.add(new RecyclerViewUser("Wally", "wally@curryware.org"));
 
         List<UserResource> userResources = allResponses.getResources();
         String jsonUserName;
@@ -115,7 +111,17 @@ public class ListUserActivity extends AppCompatActivity {
         for (int counter = 0; counter < userResources.size(); counter++) {
             jsonUserName = userResources.get(counter).getUserName();
             jsonEmailAddress = userResources.get(counter).getEmails().get(0).getValue();
-            allUsers.add(new RecyclerViewUser(jsonUserName, jsonEmailAddress));
+
+
+            int imageId = R.drawable.ic_user_image;
+            List<UserRole> allRoles = userResources.get(counter).getRoles();
+            for (int roleCounter = 0; roleCounter < allRoles.size(); roleCounter++) {
+                UserRole thisRole = allRoles.get(roleCounter);
+                if (thisRole.getDisplay().compareTo("Administrator") == 0) {
+                    imageId = R.drawable.ic_admin_user;
+                }
+            }
+            allUsers.add(new RecyclerViewUser(jsonUserName, jsonEmailAddress, imageId));
         }
 
         return allUsers;

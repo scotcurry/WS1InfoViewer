@@ -31,6 +31,7 @@ public class RecyclerViewAdapterUsers extends RecyclerView.Adapter<RecyclerViewH
 
         holder.userName.setText(ws1Users.get(position).getUserName());
         holder.emailAddress.setText(ws1Users.get(position).getEmailAddress());
+        holder.userImage.setImageResource(ws1Users.get(position).getImageId());
     }
 
     @Override

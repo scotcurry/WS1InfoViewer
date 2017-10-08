@@ -5,10 +5,12 @@ public class RecyclerViewUser {
 
     private String userName;
     private String emailAddress;
+    private int userImage;
 
-    public RecyclerViewUser(String userName, String emailAddress) {
+    public RecyclerViewUser(String userName, String emailAddress, int imageId) {
         this.userName = userName;
         this.emailAddress = emailAddress;
+        this.userImage = imageId;
     }
 
     public String getUserName() {
@@ -25,5 +27,11 @@ public class RecyclerViewUser {
 
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
+    }
+
+    public int getImageId() { return userImage; }
+
+    public void setImageId(int imageId) {
+        this.userImage = imageId;
     }
 }

@@ -127,7 +127,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:ems="10"
-        android:inputType="textPersonName"
+        android:inputType="textPassword"
         android:textAlignment="center"
         android:textSize="12sp"
         app:layout_constraintLeft_toLeftOf="parent"

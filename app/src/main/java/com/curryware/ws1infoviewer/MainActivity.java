@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crittercism.app.Crittercism;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -75,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
 
         VIDM_DOMAIN = getString(R.string.vidm_domain);
 
+        Crittercism.initialize(getApplicationContext(), "e7898e1d9aa64cdf9ade31584a8163ca00555300");
+
         tenantNameEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -113,11 +116,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Crittercism.leaveBreadcrumb("On create breadcrumb!");
         getSavedPreferences();
     }
 
     void getSystemHealthJSON() {
 
+        Crittercism.leaveBreadcrumb("Calling getSystemHealth");
         client = HttpHelpers.getInstance();
         HttpUrl url = HttpHelpers.getFormattedURL(tenantNameEdit.getText().toString(),  heathCheckEndpoint);
 

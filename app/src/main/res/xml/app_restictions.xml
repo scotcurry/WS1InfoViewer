@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<restrictions xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <restriction
+        android:key="tenant_name"
+        android:title="@string/tenant_name_key"
+        android:restrictionType="string"
+        android:description="@string/tenant_name_description" />
+
+</restrictions>

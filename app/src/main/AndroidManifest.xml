@@ -19,6 +19,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".ListUserActivity"/>
+        <meta-data android:name="android.content.APP_RESTRICTIONS"
+            android:resource="@xml/app_restictions" />
     </application>
+
 
 </manifest>

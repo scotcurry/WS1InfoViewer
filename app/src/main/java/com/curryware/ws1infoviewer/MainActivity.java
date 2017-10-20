@@ -1,12 +1,20 @@
 package com.curryware.ws1infoviewer;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.RestrictionsManager;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.UserManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.appcompat.*;
+import android.support.v7.appcompat.BuildConfig;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -44,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     final static String PREF_TENANT_NAME = "ws1TenantName";
     final static String AUTH_TOKEN_TO_PASS = "com.curryware.ws1infoviewer.AUTH_TOKEN";
     final static String TENANT_URL_TO_PASS = "com.curryware.ws1infoviewer.TENANT_URL";
+    final static String TENANT_APP_CONFIG = "tenant_name";
 
     EditText tenantNameEdit;
     EditText adminUserNameEdit;
@@ -52,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     TextView healthCheckConnection;
     TextView buildNumberTextView;
     TextView authTokenTextView;
+    TextView appVersionText;
     Button connectButton;
     Button listUsersButton;
 
@@ -59,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
     String VIDM_DOMAIN;
     String CURRENT_AUTH_TOKEN;
     String TENANT_URL;
+
+    BroadcastReceiver restrictionsReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         healthCheckConnection = findViewById(R.id.textViewHealthCheckConnectionSuccessful);
         buildNumberTextView = findViewById(R.id.textViewBuildNumber);
         authTokenTextView = findViewById(R.id.textViewAuthTokenMessage);
+        appVersionText = findViewById(R.id.textViewAppVersion);
 
         VIDM_DOMAIN = getString(R.string.vidm_domain);
 
@@ -117,14 +130,38 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Crittercism.leaveBreadcrumb("On create breadcrumb!");
+        getApplictionVersion();
         getSavedPreferences();
+        getAppRestrictions();
+    }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+        registerRestrictionsReceiver();
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+        getAppRestrictions();
+        registerRestrictionsReceiver();
+    }
+
+    @Override
+    protected void onStop() {
+
+        unregisterReceiver(restrictionsReceiver);
+        super.onStop();
     }
 
     void getSystemHealthJSON() {
 
         Crittercism.leaveBreadcrumb("Calling getSystemHealth");
         client = HttpHelpers.getInstance();
-        HttpUrl url = HttpHelpers.getFormattedURL(tenantNameEdit.getText().toString(),  heathCheckEndpoint);
+        HttpUrl url = HttpHelpers.getFormattedURL(tenantNameEdit.getText().toString(), heathCheckEndpoint);
 
         Request request = new Request.Builder()
                 .url(url)
@@ -163,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             healthCheckConnection.setVisibility(View.VISIBLE);
                             healthCheckConnection.setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
-                            String buildVersion =  sysHealth.getBuildVersion();
+                            String buildVersion = sysHealth.getBuildVersion();
                             Log.i(TAG, "Build Version: " + buildVersion);
 
                             int buildNumberOffset = buildVersion.lastIndexOf("Build");
@@ -330,5 +367,54 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return dataValidated;
+    }
+
+    private void getApplictionVersion() {
+
+        String versionName = "Not Found";
+        try {
+            PackageManager packageManager = getApplicationContext().getPackageManager();
+            String packageName = getApplicationContext().getPackageName();
+            PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
+            versionName = packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        appVersionText.setText("Version: " + versionName);
+    }
+
+    private void getAppRestrictions() {
+
+        Log.d(TAG, "Check to see if app is managed and has App Config");
+        RestrictionsManager restrictionsManager = (RestrictionsManager) this.getSystemService(Context.RESTRICTIONS_SERVICE);
+
+        Bundle appRestrictions = restrictionsManager.getApplicationRestrictions();
+        // We got something, let's try to use it.
+        if (!appRestrictions.isEmpty()) {
+            // Need to research why keys would be pending
+            if (!appRestrictions.getBoolean(UserManager.KEY_RESTRICTIONS_PENDING)) {
+                String tenantFromAppConfig = appRestrictions.getString(TENANT_APP_CONFIG);
+                Log.d(TAG, "Got a tenant from app config: " + tenantFromAppConfig);
+                tenantNameEdit.setText(tenantFromAppConfig);
+            } else {
+                Toast.makeText(this, R.string.restrictions_pending_block_user, Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
+    }
+
+    private void registerRestrictionsReceiver() {
+        IntentFilter restrictionsFilter = new IntentFilter(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
+
+        restrictionsReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "Got new app config information");
+                getAppRestrictions();
+            }
+        };
+
+        registerReceiver(restrictionsReceiver, restrictionsFilter);
     }
 }

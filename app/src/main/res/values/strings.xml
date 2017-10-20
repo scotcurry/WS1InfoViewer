@@ -9,6 +9,8 @@
     <string name="button_connect_string">Connect</string>
     <string name="button_list_users">List Users</string>
     <string name="tenant_url_label">Tenant URL</string>
+    <string name="application_version_label">Version:</string>
+    <string name="application_version_text">1.2</string>
 
     <string name="connection_success">Health Check Successful Connection</string>
     <string name="connection_failed">Health Check Connection Failed</string>
@@ -22,5 +24,9 @@
     <string name="invalid_user_name">Username is Invalid</string>
     <string name="invalid_user_password">Password is Invalid</string>
     <string name="invalid_tenant_information">Tenant Information is Invalid</string>
+
+    <string name="tenant_name_key">Tenant Name</string>
+    <string name="tenant_name_description">Enter your Workspace ONE Tenant Name</string>
+    <string name="restrictions_pending_block_user">The application is waiting for configuration information.</string>
 
 </resources>

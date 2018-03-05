@@ -5,4 +5,5 @@
     <color name="colorAccent">#65B14F</color>
     <color name="error_red">#FF2600</color>
     <color name="colorViewBackground">#E1E0E1</color>
+    <color name="primary_material_light_1">#0094cc</color>
 </resources>

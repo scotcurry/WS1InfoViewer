@@ -1,5 +1,6 @@
 package com.curryware.ws1infoviewer;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,14 +11,18 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.UserManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.os.Bundle;
-import android.support.v7.appcompat.*;
-import android.support.v7.appcompat.BuildConfig;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -64,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
     TextView appVersionText;
     Button connectButton;
     Button listUsersButton;
+    DrawerLayout navDrawer;
+    NavigationView navView;
+    Toolbar toolbar;
 
     OkHttpClient client;
     String VIDM_DOMAIN;
@@ -86,10 +94,20 @@ public class MainActivity extends AppCompatActivity {
         buildNumberTextView = findViewById(R.id.textViewBuildNumber);
         authTokenTextView = findViewById(R.id.textViewAuthTokenMessage);
         appVersionText = findViewById(R.id.textViewAppVersion);
+        navDrawer = findViewById(R.id.drawer_layout);
+        navView = findViewById(R.id.nav_view);
+        toolbar = findViewById(R.id.toolbar);
 
         VIDM_DOMAIN = getString(R.string.vidm_domain);
 
         Crittercism.initialize(getApplicationContext(), "e7898e1d9aa64cdf9ade31584a8163ca00555300");
+
+        // For this code take a look at https://developer.android.com/training/implementing-navigation/nav-drawer.html
+        setSupportActionBar(toolbar);
+        assert getSupportActionBar() != null;
+        final android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_hamburger_menu);
 
         tenantNameEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -99,7 +117,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                completeTenantString.setText("https://" + charSequence.toString() + ws1Domain);
+                String displayString = String.format("%s%s%s", "https://", charSequence.toString(), ws1Domain);
+                completeTenantString.setText(displayString);
             }
 
             @Override
@@ -129,10 +148,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                navDrawer.closeDrawers();
+                switch (item.getItemId()) {
+                    case R.id.nav_settings:
+                        Log.i(TAG, "Clicked on Settings");
+                        Intent intent = new Intent(activity, SettingsActivity.class);
+                        startActivity(intent);
+                        break;
+                }
+                return true;
+            }
+        });
+
         Crittercism.leaveBreadcrumb("On create breadcrumb!");
         getApplictionVersion();
         getSavedPreferences();
         getAppRestrictions();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Log.i(TAG, item.getTitle().toString());
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                navDrawer.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -147,14 +192,13 @@ public class MainActivity extends AppCompatActivity {
 
         super.onResume();
         getAppRestrictions();
-        registerRestrictionsReceiver();
     }
 
     @Override
     protected void onStop() {
 
-        unregisterReceiver(restrictionsReceiver);
         super.onStop();
+        unregisterReceiver(restrictionsReceiver);
     }
 
     void getSystemHealthJSON() {

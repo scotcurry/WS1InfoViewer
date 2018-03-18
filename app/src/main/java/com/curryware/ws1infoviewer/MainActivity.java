@@ -1,6 +1,5 @@
 package com.curryware.ws1infoviewer;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;

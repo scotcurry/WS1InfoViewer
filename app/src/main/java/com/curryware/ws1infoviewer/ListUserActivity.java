@@ -113,12 +113,12 @@ public class ListUserActivity extends AppCompatActivity {
             jsonEmailAddress = userResources.get(counter).getEmails().get(0).getValue();
 
 
-            int imageId = R.drawable.ic_user_image;
+            int imageId = R.drawable.ic_person_user_24dp;
             List<UserRole> allRoles = userResources.get(counter).getRoles();
             for (int roleCounter = 0; roleCounter < allRoles.size(); roleCounter++) {
                 UserRole thisRole = allRoles.get(roleCounter);
                 if (thisRole.getDisplay().compareTo("Administrator") == 0) {
-                    imageId = R.drawable.ic_admin_user;
+                    imageId = R.drawable.ic_person_admin_24dp;
                 }
             }
             allUsers.add(new RecyclerViewUser(jsonUserName, jsonEmailAddress, imageId));

@@ -7,4 +7,10 @@
         android:restrictionType="string"
         android:description="@string/tenant_name_description" />
 
+    <restriction
+        android:key="admin_user_name"
+        android:title="@string/admin_user_name"
+        android:restrictionType="string"
+        android:description="@string/admin_user_name_hint" />
+
 </restrictions>

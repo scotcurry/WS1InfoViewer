@@ -15,6 +15,12 @@ public class AppSettings {
     @SerializedName("password")
     @Expose
     private String password;
+    @SerializedName("tenantName")
+    @Expose
+    private String tenantName;
+    @SerializedName("tenantDomain")
+    @Expose
+    private String tenantDomain;
     @SerializedName("ws1tenant")
     @Expose
     private String issueToken;
@@ -34,6 +40,14 @@ public class AppSettings {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public String getTenantName() { return tenantName; }
+
+    public void setTenantName(String tenantName) {this.tenantName = tenantName; }
+
+    public String getTenantDomain() { return tenantDomain; }
+
+    public void setTenantDomain() { this.tenantDomain = tenantDomain; }
 
     public String getIssueToken() {
         return issueToken;

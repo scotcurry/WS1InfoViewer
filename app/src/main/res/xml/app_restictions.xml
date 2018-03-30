@@ -13,4 +13,10 @@
         android:restrictionType="string"
         android:description="@string/admin_user_name_hint" />
 
+    <restriction
+        android:key="admin_password"
+        android:title="@string/admin_user_password"
+        android:restrictionType="string"
+        android:description="@string/admin_user_password" />
+
 </restrictions>

@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     String TENANT_URL;
 
     BroadcastReceiver restrictionsReceiver;
+    AppSettings appSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,8 +165,8 @@ public class MainActivity extends AppCompatActivity {
 
         Crittercism.leaveBreadcrumb("On create breadcrumb!");
         getApplictionVersion();
-        getSavedPreferences();
         getAppRestrictions();
+
     }
 
     @Override
@@ -184,6 +185,14 @@ public class MainActivity extends AppCompatActivity {
 
         super.onStart();
         registerRestrictionsReceiver();
+
+        /*
+        appSettings = getSavedPreferences();
+        if (appSettings.getUsername().length() == 0 || appSettings.getPassword().length() == 0 ||
+                appSettings.getTenantName().length() == 0 || appSettings.getTenantDomain().length() == 0) {
+            Crittercism.leaveBreadcrumb("Don't have settings");
+        }
+        */
     }
 
     @Override
@@ -363,7 +372,7 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
-    private void getSavedPreferences() {
+    private AppSettings getSavedPreferences() {
 
         SharedPreferences sharedPrefs = getPreferences(Context.MODE_PRIVATE);
 
@@ -381,6 +390,12 @@ public class MainActivity extends AppCompatActivity {
             tenantNameEdit.setText(ws1TenantName);
             completeTenantString.setText("https://" + ws1TenantName + VIDM_DOMAIN);
         }
+
+        AppSettings appSettingsToReturn = new AppSettings();
+        appSettingsToReturn.setUsername(adminUserName);
+        appSettingsToReturn.setPassword(adminPassword);
+
+        return appSettingsToReturn;
     }
 
     private void handleConnectionButton() {

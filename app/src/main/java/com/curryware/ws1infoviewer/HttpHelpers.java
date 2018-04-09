@@ -13,11 +13,10 @@ public class HttpHelpers {
     public static HttpUrl getFormattedURL(String tenantName, String urlEndpoint) {
 
         Log.d(TAG, "Tenant Name: " + tenantName);
-        String ws1Tenant = tenantName.trim() + VIDM_DOMAIN;
 
         return new HttpUrl.Builder()
                 .scheme("https")
-                .host(ws1Tenant)
+                .host(tenantName)
                 .addEncodedPathSegments(urlEndpoint)
                 .build();
     }

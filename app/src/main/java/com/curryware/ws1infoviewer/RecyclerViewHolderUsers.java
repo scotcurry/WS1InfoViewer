@@ -3,25 +3,31 @@ package com.curryware.ws1infoviewer;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-public class RecyclerViewHolderUsers extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class RecyclerViewHolderUsers extends RecyclerView.ViewHolder {
 
     public TextView userName;
     public TextView emailAddress;
     public ImageView userImage;
+    public TextView userLocation;
+    public TextView userID;
+    public TextView userDomain;
+    public TextView userActive;
+    public RelativeLayout parentLayout;
 
+    // The key to this entire class is that it contains the parent view that can handle the OnClickListener
+    // in the
     public RecyclerViewHolderUsers(View itemView) {
         super (itemView);
-        itemView.setOnClickListener(this);
         userName = itemView.findViewById(R.id.recycler_user_name);
         emailAddress = itemView.findViewById(R.id.recycler_user_email_address);
         userImage = itemView.findViewById(R.id.user_role_image);
-    }
-
-    @Override
-    public void onClick(View view) {
-        Toast.makeText(view.getContext(), "Clicked Position: " + getAdapterPosition(), Toast.LENGTH_LONG).show();
+        parentLayout = itemView.findViewById(R.id.user_view_parent);
+        userLocation = itemView.findViewById(R.id.recycler_location);
+        userID = itemView.findViewById(R.id.recycler_userID);
+        userDomain = itemView.findViewById(R.id.recycler_userDomain);
+        userActive = itemView.findViewById(R.id.recycler_active);
     }
 }

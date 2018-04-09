@@ -1,13 +1,13 @@
 package com.curryware.ws1infoviewer;
 
 import android.content.Intent;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -31,6 +31,8 @@ public class ListUserActivity extends AppCompatActivity {
     LinearLayoutManager linearLayoutManager;
     RecyclerView recyclerView;
     RecyclerViewAdapterUsers recyclerViewAdapterUsers;
+    Toolbar settings_toolbar;
+    List<UserResource> userResourceList;
 
     List<RecyclerViewUser> ws1Users;
 
@@ -51,8 +53,22 @@ public class ListUserActivity extends AppCompatActivity {
         linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.addItemDecoration(new RecyclerViewItemDecorationUsers(48));
+        settings_toolbar = findViewById(R.id.settings_toolbar);
+
+        setSupportActionBar(settings_toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         getAllUsers(tenantURL, RAW_OAUTH_TOKEN);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     private void getAllUsers(String tenantURL, String oAuthToken) {
@@ -105,23 +121,37 @@ public class ListUserActivity extends AppCompatActivity {
 
         List<RecyclerViewUser> allUsers = new ArrayList<>();
 
-        List<UserResource> userResources = allResponses.getResources();
+        userResourceList = allResponses.getResources();
+
         String jsonUserName;
         String jsonEmailAddress;
-        for (int counter = 0; counter < userResources.size(); counter++) {
-            jsonUserName = userResources.get(counter).getUserName();
-            jsonEmailAddress = userResources.get(counter).getEmails().get(0).getValue();
+        String jsonUserLocation;
+        String jsonUserID;
+        String jsonUserFirstName;
+        String jsonGivenName;
+        String jsonUserDomain;
+        boolean jsonUserActive;
 
+        for (int counter = 0; counter < userResourceList.size(); counter++) {
+            jsonUserName = userResourceList.get(counter).getUserName();
+            jsonEmailAddress = userResourceList.get(counter).getEmails().get(0).getValue();
+            jsonUserLocation = userResourceList.get(counter).getMeta().getLocation();
+            jsonUserID = userResourceList.get(counter).getId();
+            jsonUserFirstName = userResourceList.get(counter).getName().getGivenName();
+            jsonGivenName = userResourceList.get(counter).getName().getFamilyName();
+            jsonUserDomain = userResourceList.get(counter).getUrnScimSchemasExtensionWorkspace10().getDomain();
+            jsonUserActive = userResourceList.get(counter).getActive();
 
             int imageId = R.drawable.ic_person_user_24dp;
-            List<UserRole> allRoles = userResources.get(counter).getRoles();
+            List<UserRole> allRoles = userResourceList.get(counter).getRoles();
             for (int roleCounter = 0; roleCounter < allRoles.size(); roleCounter++) {
                 UserRole thisRole = allRoles.get(roleCounter);
                 if (thisRole.getDisplay().compareTo("Administrator") == 0) {
                     imageId = R.drawable.ic_person_admin_24dp;
                 }
             }
-            allUsers.add(new RecyclerViewUser(jsonUserName, jsonEmailAddress, imageId));
+            allUsers.add(new RecyclerViewUser(jsonUserName, jsonEmailAddress, imageId, jsonUserLocation,
+                    jsonUserID, jsonUserFirstName, jsonGivenName, jsonUserDomain, jsonUserActive));
         }
 
         return allUsers;

@@ -12,19 +12,20 @@ import android.content.pm.PackageManager;
 import android.os.UserManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
     final static String TAG = MainActivity.class.getSimpleName();
 
     final static MediaType mediaTypeJSON = MediaType.parse("application/json; charset=utf-8");
-    final static String ws1Domain = ".vmwareidentity.com";
     final static String heathCheckEndpoint = "SAAS/API/1.0/REST/system/health";
     final static String loginEndpoint = "SAAS/API/1.0/REST/auth/system/login";
     final static String PREF_ADMIN_USERNAME = "adminUserName";
@@ -57,23 +57,21 @@ public class MainActivity extends AppCompatActivity {
     final static String AUTH_TOKEN_TO_PASS = "com.curryware.ws1infoviewer.AUTH_TOKEN";
     final static String TENANT_URL_TO_PASS = "com.curryware.ws1infoviewer.TENANT_URL";
     final static String TENANT_APP_CONFIG = "tenant_name";
+    final static String BUILD_CONST = "Build";
 
     EditText tenantNameEdit;
     EditText adminUserNameEdit;
     EditText adminPasswordEdit;
-    TextView completeTenantString;
     TextView healthCheckConnection;
-    TextView buildNumberTextView;
-    TextView authTokenTextView;
     TextView appVersionText;
     Button connectButton;
     Button listUsersButton;
     DrawerLayout navDrawer;
     NavigationView navView;
     Toolbar toolbar;
+    Spinner tenant_domain;
 
     OkHttpClient client;
-    String VIDM_DOMAIN;
     String CURRENT_AUTH_TOKEN;
     String TENANT_URL;
 
@@ -86,19 +84,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         activity = this;
 
-        tenantNameEdit = findViewById(R.id.editTextTenantName);
-        adminUserNameEdit = findViewById(R.id.editTextAdminUserName);
-        adminPasswordEdit = findViewById(R.id.editTextAdminPassword);
-        completeTenantString = findViewById(R.id.textViewCompleteTenant);
-        healthCheckConnection = findViewById(R.id.textViewHealthCheckConnectionSuccessful);
-        buildNumberTextView = findViewById(R.id.textViewBuildNumber);
-        authTokenTextView = findViewById(R.id.textViewAuthTokenMessage);
+        tenantNameEdit = findViewById(R.id.ws1_tenant);
+        adminUserNameEdit = findViewById(R.id.admin_user_name);
+        adminPasswordEdit = findViewById(R.id.admin_password);
         appVersionText = findViewById(R.id.textViewAppVersion);
+        tenant_domain = findViewById(R.id.spinnerTenantDomain);
         navDrawer = findViewById(R.id.drawer_layout);
         navView = findViewById(R.id.nav_view);
         toolbar = findViewById(R.id.toolbar);
-
-        VIDM_DOMAIN = getString(R.string.vidm_domain);
 
         Crittercism.initialize(getApplicationContext(), "e7898e1d9aa64cdf9ade31584a8163ca00555300");
 
@@ -109,23 +102,9 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_hamburger_menu);
 
-        tenantNameEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String displayString = String.format("%s%s%s", "https://", charSequence.toString(), ws1Domain);
-                completeTenantString.setText(displayString);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.tenant_options, android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        tenant_domain.setAdapter(adapter);
 
         connectButton = findViewById(R.id.buttonConnect);
         connectButton.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         listUsersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                TENANT_URL = tenantNameEdit.getText().toString();
+                TENANT_URL = tenantNameEdit.getText().toString() + "." + tenant_domain.getSelectedItem().toString();
                 Intent intent = new Intent(activity, ListUserActivity.class);
                 intent.putExtra(AUTH_TOKEN_TO_PASS, CURRENT_AUTH_TOKEN);
                 intent.putExtra(TENANT_URL_TO_PASS, TENANT_URL);
@@ -186,13 +165,10 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         registerRestrictionsReceiver();
 
-        /*
         appSettings = getSavedPreferences();
-        if (appSettings.getUsername().length() == 0 || appSettings.getPassword().length() == 0 ||
-                appSettings.getTenantName().length() == 0 || appSettings.getTenantDomain().length() == 0) {
+        if (appSettings == null) {
             Crittercism.leaveBreadcrumb("Don't have settings");
         }
-        */
     }
 
     @Override
@@ -213,7 +189,9 @@ public class MainActivity extends AppCompatActivity {
 
         Crittercism.leaveBreadcrumb("Calling getSystemHealth");
         client = HttpHelpers.getInstance();
-        HttpUrl url = HttpHelpers.getFormattedURL(tenantNameEdit.getText().toString(), heathCheckEndpoint);
+
+        String healthCheckURI = tenantNameEdit.getText() + "." + tenant_domain.getSelectedItem().toString();
+        HttpUrl url = HttpHelpers.getFormattedURL(healthCheckURI, heathCheckEndpoint);
 
         Request request = new Request.Builder()
                 .url(url)
@@ -250,6 +228,15 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            String buildVersion = sysHealth.getBuildVersion();
+                            int startOfBuild = buildVersion.indexOf(BUILD_CONST);
+                            buildVersion = buildVersion.substring(0, startOfBuild - 1);
+                            Log.i(TAG, "Build Version: " + buildVersion);
+
+                            Snackbar
+                                    .make(findViewById(R.id.drawer_layout), "Connected - Version: " + buildVersion, Snackbar.LENGTH_LONG)
+                                    .show();
+                            /*
                             healthCheckConnection.setVisibility(View.VISIBLE);
                             healthCheckConnection.setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
                             String buildVersion = sysHealth.getBuildVersion();
@@ -262,6 +249,7 @@ public class MainActivity extends AppCompatActivity {
                             buildNumberTextView.setVisibility(View.VISIBLE);
                             buildNumberTextView.setText(buildNumber);
                             buildNumberTextView.setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
+                            */
                         }
                     });
                     getAuthToken();
@@ -282,8 +270,10 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, loginJSON);
         RequestBody body = RequestBody.create(mediaTypeJSON, loginJSON);
 
+        String vidmDomain = tenantNameEdit.getText() + "." + tenant_domain.getSelectedItem().toString();
+        HttpUrl loginURI = HttpHelpers.getFormattedURL(vidmDomain, loginEndpoint);
         Request request = new Request.Builder()
-                .url(HttpHelpers.getFormattedURL(tenantNameEdit.getText().toString(), loginEndpoint))
+                .url(loginURI)
                 .post(body)
                 .addHeader("Accept", "application/json")
                 .build();
@@ -296,9 +286,11 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        /*
                         authTokenTextView.setVisibility(View.VISIBLE);
                         authTokenTextView.setText(getString(R.string.auth_token_failed));
                         authTokenTextView.setTextColor(ContextCompat.getColor(activity, R.color.error_red));
+                        */
 
                         Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
@@ -314,9 +306,11 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            /*
                             authTokenTextView.setVisibility(View.VISIBLE);
                             authTokenTextView.setTextColor(ContextCompat.getColor(activity, R.color.error_red));
                             authTokenTextView.setText(toastString);
+                            */
                             Toast.makeText(activity, toastString, Toast.LENGTH_LONG).show();
                         }
                     });
@@ -330,9 +324,11 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            /*
                             authTokenTextView.setVisibility(View.VISIBLE);
                             authTokenTextView.setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
                             authTokenTextView.setText(getString(R.string.auth_token_success));
+                            */
                             listUsersButton.setEnabled(true);
                             handleSaveSettings();
                         }
@@ -388,7 +384,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (ws1TenantName.length() > 0) {
             tenantNameEdit.setText(ws1TenantName);
-            completeTenantString.setText("https://" + ws1TenantName + VIDM_DOMAIN);
         }
 
         AppSettings appSettingsToReturn = new AppSettings();
@@ -439,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        appVersionText.setText("Version: " + versionName);
+        appVersionText.setText("v" + versionName);
     }
 
     private void getAppRestrictions() {

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/user_view_parent">
 
     <ImageView
         android:layout_width="wrap_content"
@@ -27,5 +28,25 @@
         android:id="@+id/recycler_user_email_address"
         android:layout_toEndOf="@id/user_role_image"
         android:layout_below="@id/recycler_user_name" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:id="@+id/recycler_location"/>
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:id="@+id/recycler_userID"/>
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:id="@+id/recycler_userDomain" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:id="@+id/recycler_active"/>
 
 </RelativeLayout>

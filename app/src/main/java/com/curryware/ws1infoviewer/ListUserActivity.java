@@ -130,6 +130,7 @@ public class ListUserActivity extends AppCompatActivity {
         String jsonUserFirstName;
         String jsonGivenName;
         String jsonUserDomain;
+        String jsonUPN;
         boolean jsonUserActive;
 
         for (int counter = 0; counter < userResourceList.size(); counter++) {
@@ -141,6 +142,7 @@ public class ListUserActivity extends AppCompatActivity {
             jsonGivenName = userResourceList.get(counter).getName().getFamilyName();
             jsonUserDomain = userResourceList.get(counter).getUrnScimSchemasExtensionWorkspace10().getDomain();
             jsonUserActive = userResourceList.get(counter).getActive();
+            jsonUPN = userResourceList.get(counter).getUrnScimSchemasExtensionWorkspace10().getUserPrincipalName();
 
             int imageId = R.drawable.ic_person_user_24dp;
             List<UserRole> allRoles = userResourceList.get(counter).getRoles();
@@ -150,8 +152,13 @@ public class ListUserActivity extends AppCompatActivity {
                     imageId = R.drawable.ic_person_admin_24dp;
                 }
             }
+
+            if (jsonUPN == null) {
+                jsonUPN = "Empty";
+            }
+
             allUsers.add(new RecyclerViewUser(jsonUserName, jsonEmailAddress, imageId, jsonUserLocation,
-                    jsonUserID, jsonUserFirstName, jsonGivenName, jsonUserDomain, jsonUserActive));
+                    jsonUserID, jsonUserFirstName, jsonGivenName, jsonUserDomain, jsonUserActive, jsonUPN));
         }
 
         return allUsers;

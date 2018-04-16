@@ -15,6 +15,8 @@ public class RecyclerViewHolderUsers extends RecyclerView.ViewHolder {
     public TextView userID;
     public TextView userDomain;
     public TextView userActive;
+    public TextView userFullName;
+    public TextView userUPN;
     public RelativeLayout parentLayout;
 
     // The key to this entire class is that it contains the parent view that can handle the OnClickListener
@@ -28,6 +30,8 @@ public class RecyclerViewHolderUsers extends RecyclerView.ViewHolder {
         userLocation = itemView.findViewById(R.id.recycler_location);
         userID = itemView.findViewById(R.id.recycler_userID);
         userDomain = itemView.findViewById(R.id.recycler_userDomain);
+        userFullName = itemView.findViewById(R.id.recycler_full_name);
         userActive = itemView.findViewById(R.id.recycler_active);
+        userUPN = itemView.findViewById(R.id.recycler_user_upn);
     }
 }

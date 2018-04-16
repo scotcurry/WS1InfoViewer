@@ -19,7 +19,6 @@
         android:id="@+id/constraint_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorViewBackground"
         tools:context="com.curryware.ws1infoviewer.MainActivity">
 
         <android.support.v7.widget.Toolbar
@@ -27,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
+            android:theme="@style/WS1_Info_Viewer_Theme" />
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/input_ws1_admin_user_name"
@@ -35,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar">
@@ -97,18 +96,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/input_ws1_tenant" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/floating_button_save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_marginBottom="32dp"
-            android:layout_marginEnd="32dp"
-            android:src="@drawable/ic_check_black_24dp"
-            app:elevation="2dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
         <Button
             android:id="@+id/buttonConnect"
             style="@android:style/Widget.DeviceDefault.Button.Small"
@@ -127,25 +114,37 @@
             android:id="@+id/buttonListUsers"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text="@string/button_list_users"
-            app:layout_constraintBottom_toTopOf="@+id/textViewAppVersion"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
-
-        <TextView
-            android:id="@+id/textViewAppVersion"
-            android:layout_width="60dp"
-            android:layout_height="15dp"
-            android:layout_marginBottom="8dp"
+            android:layout_gravity="bottom|center"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:gravity="center"
-            android:text="@string/app_version"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="24dp"
+            android:enabled="false"
+            android:text="@string/button_list_users"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/buttonConnect" />
+
+        <android.support.design.widget.CoordinatorLayout
+            android:id="@+id/containerLayout"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/floating_button_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:layout_marginBottom="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_gravity="bottom|end"
+                android:src="@drawable/ic_check_black_24dp"
+                app:elevation="2dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </android.support.design.widget.CoordinatorLayout>
 
     </android.support.constraint.ConstraintLayout>
 

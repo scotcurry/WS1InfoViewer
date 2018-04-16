@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:title="@string/nav_settings"
+        android:title="@string/nav_about"
         android:id="@+id/nav_settings"
         />
 </menu>

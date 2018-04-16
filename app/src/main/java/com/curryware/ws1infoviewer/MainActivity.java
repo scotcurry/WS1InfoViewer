@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
     EditText adminUserNameEdit;
     EditText adminPasswordEdit;
     TextView healthCheckConnection;
-    TextView appVersionText;
     Button connectButton;
     Button listUsersButton;
     DrawerLayout navDrawer;
@@ -87,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
         tenantNameEdit = findViewById(R.id.ws1_tenant);
         adminUserNameEdit = findViewById(R.id.admin_user_name);
         adminPasswordEdit = findViewById(R.id.admin_password);
-        appVersionText = findViewById(R.id.textViewAppVersion);
         tenant_domain = findViewById(R.id.spinnerTenantDomain);
         navDrawer = findViewById(R.id.drawer_layout);
         navView = findViewById(R.id.nav_view);
@@ -143,14 +141,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Crittercism.leaveBreadcrumb("On create breadcrumb!");
-        getApplictionVersion();
+        //getApplictionVersion();
         getAppRestrictions();
 
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Log.i(TAG, item.getTitle().toString());
         switch (item.getItemId()) {
             case android.R.id.home:
                 navDrawer.openDrawer(GravityCompat.START);
@@ -234,22 +231,8 @@ public class MainActivity extends AppCompatActivity {
                             Log.i(TAG, "Build Version: " + buildVersion);
 
                             Snackbar
-                                    .make(findViewById(R.id.drawer_layout), "Connected - Version: " + buildVersion, Snackbar.LENGTH_LONG)
+                                    .make(findViewById(R.id.containerLayout), "Connected - Version: " + buildVersion, Snackbar.LENGTH_LONG)
                                     .show();
-                            /*
-                            healthCheckConnection.setVisibility(View.VISIBLE);
-                            healthCheckConnection.setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
-                            String buildVersion = sysHealth.getBuildVersion();
-                            Log.i(TAG, "Build Version: " + buildVersion);
-
-                            int buildNumberOffset = buildVersion.lastIndexOf("Build");
-                            String buildNumber = buildVersion.substring(0, buildNumberOffset);
-                            buildNumber = getString(R.string.version_string) + " " + buildNumber;
-
-                            buildNumberTextView.setVisibility(View.VISIBLE);
-                            buildNumberTextView.setText(buildNumber);
-                            buildNumberTextView.setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
-                            */
                         }
                     });
                     getAuthToken();
@@ -306,17 +289,11 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            /*
-                            authTokenTextView.setVisibility(View.VISIBLE);
-                            authTokenTextView.setTextColor(ContextCompat.getColor(activity, R.color.error_red));
-                            authTokenTextView.setText(toastString);
-                            */
                             Toast.makeText(activity, toastString, Toast.LENGTH_LONG).show();
                         }
                     });
                     throw new IOException("Unexpected Code: " + response);
                 } else {
-                    // ResponseBody body = response.body();
                     LoginResponse loginResponse = gson.fromJson(response.body().string(), LoginResponse.class);
                     Log.i(TAG, "Session Token: " + loginResponse.getSessionToken());
                     CURRENT_AUTH_TOKEN = loginResponse.getSessionToken();
@@ -324,11 +301,6 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            /*
-                            authTokenTextView.setVisibility(View.VISIBLE);
-                            authTokenTextView.setTextColor(ContextCompat.getColor(activity, R.color.colorAccent));
-                            authTokenTextView.setText(getString(R.string.auth_token_success));
-                            */
                             listUsersButton.setEnabled(true);
                             handleSaveSettings();
                         }
@@ -422,20 +394,6 @@ public class MainActivity extends AppCompatActivity {
         return dataValidated;
     }
 
-    private void getApplictionVersion() {
-
-        String versionName = "Not Found";
-        try {
-            PackageManager packageManager = getApplicationContext().getPackageManager();
-            String packageName = getApplicationContext().getPackageName();
-            PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
-            versionName = packageInfo.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        appVersionText.setText("v" + versionName);
-    }
 
     private void getAppRestrictions() {
 

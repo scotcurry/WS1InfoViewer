@@ -12,10 +12,11 @@ public class RecyclerViewUser {
     private String userLastName;
     private String userID;
     private String userDomain;
+    private String userUPN;
 
     public RecyclerViewUser(String userName, String emailAddress, int imageId, String userLocation,
                            String userID, String userFirstName, String userLastName, String userDomain,
-                           boolean userActive) {
+                           boolean userActive, String userUPN) {
         this.userName = userName;
         this.emailAddress = emailAddress;
         this.userImage = imageId;
@@ -25,6 +26,7 @@ public class RecyclerViewUser {
         this.userFirstName = userFirstName;
         this.userLastName = userLastName;
         this.userDomain = userDomain;
+        this.userUPN = userUPN;
     }
 
     public String getUserName() {
@@ -65,7 +67,21 @@ public class RecyclerViewUser {
 
     public void setUserFirstName(String userFirstName) { this.userFirstName = userFirstName; }
 
-    public String gerUserDomain() { return  userDomain; }
+    public String getUserLastName() { return userLastName; }
+
+    public void setUserLastName(String userLastName) { this.userLastName = userLastName; }
+
+    public String gerUserDomain() { return userDomain; }
 
     public void setUserDomain(String userDomain) { this.userDomain = userDomain; }
+
+    public String getUserUPN() { return userUPN; }
+
+    public void setUserUPN(String userUPN) {
+        if (userUPN == null) {
+            this.userUPN = "Empty";
+        } else {
+            this.userUPN = userUPN;
+        }
+    }
 }

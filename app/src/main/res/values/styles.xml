@@ -12,6 +12,10 @@
 
     <style name="PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="WS1_Info_Viewer_Theme" parent="Theme.AppCompat.DayNight.NoActionBar" />
+    <style name="WS1_Info_Viewer_Theme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:fontFamily">roboto"</item>
+        <item name="android:navigationBarColor">?attr/colorAccent</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+    </style>
 
 </resources>

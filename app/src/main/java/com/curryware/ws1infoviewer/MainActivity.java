@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.RestrictionsManager;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.UserManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -269,12 +267,6 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        /*
-                        authTokenTextView.setVisibility(View.VISIBLE);
-                        authTokenTextView.setText(getString(R.string.auth_token_failed));
-                        authTokenTextView.setTextColor(ContextCompat.getColor(activity, R.color.error_red));
-                        */
-
                         Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 });

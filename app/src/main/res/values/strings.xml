@@ -49,6 +49,9 @@
     <string-array name="tenant_options">
         <item>vmwareidentity.com</item>
         <item>vidmpreview.com</item>
+        <item>vmwareidentity.com.au</item>
+        <item>vmwareidentity.eu</item>
+        <item>vmwareidentity.asia</item>
     </string-array>
 
 </resources>

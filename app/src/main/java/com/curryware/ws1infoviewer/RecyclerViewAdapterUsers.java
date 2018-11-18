@@ -2,20 +2,19 @@ package com.curryware.ws1infoviewer;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.util.List;
 
 public class RecyclerViewAdapterUsers extends RecyclerView.Adapter<RecyclerViewHolderUsers> {
 
-    List<RecyclerViewUser> ws1Users;
+    private List<RecyclerViewUser> ws1Users;
     private Context context;
 
-    public RecyclerViewAdapterUsers(Context context, List<RecyclerViewUser> users) {
+    RecyclerViewAdapterUsers(Context context, List<RecyclerViewUser> users) {
         this.ws1Users = users;
         this.context = context;
     }
@@ -24,8 +23,7 @@ public class RecyclerViewAdapterUsers extends RecyclerView.Adapter<RecyclerViewH
     public RecyclerViewHolderUsers onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_user_listitem, null);
-        RecyclerViewHolderUsers recyclerViewHolderUsers = new RecyclerViewHolderUsers(layoutView);
-        return recyclerViewHolderUsers;
+        return new RecyclerViewHolderUsers(layoutView);
     }
 
     @Override
